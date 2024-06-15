@@ -1,17 +1,7 @@
 package com.og.medicare.ui.login;
 
 import android.app.Activity;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,6 +14,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -35,9 +32,9 @@ import com.og.medicare.databinding.ActivityLoginBinding;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-
     private LoginViewModel loginViewModel;
     private ActivityLoginBinding binding;
+
     private FirebaseAuth mAuth;
 
     @Override
@@ -111,9 +108,6 @@ public class LoginActivity extends AppCompatActivity {
                         passwordEditText.getText().toString());
             }
         };
-
-        Activity self = this;
-
         usernameEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -121,10 +115,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    loginViewModel.login(usernameEditText.getText().toString(),
-//                            passwordEditText.getText().toString(), mAuth, self);
-                    login(usernameEditText.getText().toString(),
+                    loginViewModel.login(usernameEditText.getText().toString(),
                             passwordEditText.getText().toString());
+//                    login(usernameEditText.getText().toString(),
+//                            passwordEditText.getText().toString());
                 }
                 return false;
             }
@@ -134,10 +128,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-//                loginViewModel.login(usernameEditText.getText().toString(),
-//                        passwordEditText.getText().toString(), mAuth, self);
+                loginViewModel.login(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString());
 
-                login(usernameEditText.getText().toString(), passwordEditText.getText().toString());
+//                login(usernameEditText.getText().toString(),
+//                        passwordEditText.getText().toString());
             }
         });
     }
@@ -163,42 +158,6 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
-
-
-
-//        mAuth.signInWithEmailAndPassword(email, password)
-//                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                        if (task.isSuccessful()) {
-//                            // Sign in success, update UI with the signed-in user's information
-//                            Log.d(TAG, "createUserWithEmail:success");
-//                            Toast.makeText(LoginActivity.this, "Authentication Success.",
-//                                    Toast.LENGTH_SHORT).show();
-//                            FirebaseUser user = mAuth.getCurrentUser();
-//
-//                            Result<LoggedInUser> result = LoginDataSource.handleLogin(user);
-//                            loginViewModel.setResult(result);
-//                        } else {
-//                            // If sign in fails, display a message to the user.
-//                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-//                                    Toast.LENGTH_SHORT).show();
-//
-//                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-//                            loginViewModel.setResult(new Result.Error(new IOException("Error logging in")));
-//                        }
-//                    }
-//                });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            // reload();
-        }
     }
 
     private void updateUiWithUser(LoggedInUserView model) {

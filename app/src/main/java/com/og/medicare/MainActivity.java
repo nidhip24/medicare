@@ -18,16 +18,17 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.FirebaseApp;
+import com.og.medicare.ui.home.Home;
 import com.og.medicare.ui.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+
+        FirebaseApp.initializeApp(this);
 
         final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -38,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
                     Intent i = new Intent(getApplicationContext(), LoginActivity.class);
 //                    startActivity(i);
                     someActivityResultLauncher.launch(i);
-
                 }
             }, 1500);
         } else {
@@ -61,11 +61,12 @@ public class MainActivity extends AppCompatActivity {
                         // There are no request codes
                         Intent data = result.getData();
                         Log.i("MAIN", "IN RESULT");
-                        if (data != null) {
-                            Toast.makeText(getApplicationContext(), "Logged in!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Logged in2!", Toast.LENGTH_SHORT).show();
-                        }
+                        startActivity(new Intent(getApplicationContext(), Home.class));
+//                        if (data != null) {
+//                            Toast.makeText(getApplicationContext(), "Logged in!", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_SHORT).show();
+//                        }
                     }
                 }
             });

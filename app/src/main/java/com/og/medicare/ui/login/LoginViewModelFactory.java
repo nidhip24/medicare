@@ -1,8 +1,8 @@
 package com.og.medicare.ui.login;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.annotation.NonNull;
 
 import com.og.medicare.data.LoginDataSource;
 import com.og.medicare.data.LoginRepository;

@@ -17,6 +17,9 @@
         android:theme="@style/Theme.MedicareApp"
         tools:targetApi="tiramisu" >
         <activity
+            android:name=".ui.home.Home"
+            android:exported="false" />
+        <activity
             android:name="com.og.medicare.ui.login.LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_login" />
