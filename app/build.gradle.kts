@@ -49,7 +49,17 @@ dependencies {
     implementation(libs.google.firebase.auth)
     implementation(libs.play.services.auth)
 
+    implementation(libs.lombok)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
+    implementation(libs.legacy.support.v4)
+    annotationProcessor(libs.lombok)
 
+    implementation(platform(libs.okhttp.bom))
+
+    // define any required OkHttp artifacts without version
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

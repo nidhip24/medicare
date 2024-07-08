@@ -42,6 +42,14 @@ public class LoginViewModel extends ViewModel {
         }
     }
 
+    public void setLogin(boolean isLogin, String username) {
+        if (!isLogin) {
+            loginResult.setValue(new LoginResult(R.string.login_failed));
+        } else {
+            loginResult.setValue(new LoginResult(new LoggedInUserView(username)));
+        }
+    }
+
     public void loginDataChanged(String username, String password) {
         if (!isUserNameValid(username)) {
             loginFormState.setValue(new LoginFormState(R.string.invalid_username, null));

@@ -7,4 +7,15 @@
     <color name="colorPrimaryDark">#307470</color>
     <color name="colorAccent">#5f5b6e</color>
     <color name="colorDark">#353243</color>
+
+    <!--    red color -->
+    <color name="red">#FF0000</color>
+    <color name="blue">#0000FF</color>
+    <color name="orange">#FFA500</color>
+
+<!--    light red, blue and orange -->
+    <color name="light_red">#FF6347</color>
+    <color name="light_blue">#ADD8E6</color>
+    <color name="light_orange">#FFD700</color>
+
 </resources>

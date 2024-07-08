@@ -161,6 +161,9 @@ public class LoginActivity extends AppCompatActivity {
                 signIn();
             }
         });
+
+        // TODO: Remove this
+        //mAuth.signOut();
     }
 
     @Override
@@ -168,8 +171,15 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            Toast.makeText(getApplicationContext(), "Already logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Authentication success",
+                    Toast.LENGTH_SHORT).show();
+
+            String username = currentUser.getEmail();
+            loginViewModel.setLogin(true, username);
+        }
         // updateUI(currentUser);
-        Toast.makeText(getApplicationContext(), "Already logged in", Toast.LENGTH_SHORT).show();
     }
 
     private void login(String email, String password) {
@@ -185,12 +195,17 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "Authentication success",
                                     Toast.LENGTH_SHORT).show();
+
+                            String username = user != null ? user.getEmail() : "";
+                            loginViewModel.setLogin(true, username);
                             //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+
+                            loginViewModel.setLogin(false, null);
                             //updateUI(null);
                         }
                     }

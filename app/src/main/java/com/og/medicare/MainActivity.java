@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                         // There are no request codes
                         Intent data = result.getData();
                         Log.i("MAIN", "IN RESULT");
-                        startActivity(new Intent(getApplicationContext(), Home.class));
+                        startActivity(new Intent(getApplicationContext(), Home2.class));
 //                        if (data != null) {
 //                            Toast.makeText(getApplicationContext(), "Logged in!", Toast.LENGTH_SHORT).show();
 //                        } else {
