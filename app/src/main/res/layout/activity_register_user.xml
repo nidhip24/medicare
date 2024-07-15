@@ -88,9 +88,24 @@ tools:context=".ui.register.RegisterUser">
                 android:id="@+id/Contact"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Male"
+            >
+        </com.google.android.material.radiobutton.MaterialRadioButton>
 
 
-            <RelativeLayout
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Female"
+            >
+        </com.google.android.material.radiobutton.MaterialRadioButton>
+
+
+
+        <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -105,14 +120,14 @@ tools:context=".ui.register.RegisterUser">
 
 
         <Button
-            android:id="@+id/login"
+            android:id="@+id/Register"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Login"
+            android:text="Register"
             />
 
 
