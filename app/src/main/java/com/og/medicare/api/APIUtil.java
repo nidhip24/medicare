@@ -1,8 +1,11 @@
 package com.og.medicare.api;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -11,6 +14,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 
 public class APIUtil {
 
@@ -20,6 +28,8 @@ public class APIUtil {
             = MediaType.parse("application/json; charset=utf-8");
 
     static OkHttpClient client = getOkHttpClient();
+
+    static String TAG = APIUtil.class.toString();
 
     // okhttp client
     public static OkHttpClient getOkHttpClient() {
@@ -43,6 +53,38 @@ public class APIUtil {
     public static Response addDistribution(JSONObject obj) {
         RequestBody body = RequestBody.create(String.valueOf(obj), JSON);
         return callAPI(BASE_URL + "/distribution", body);
+    }
+
+    public static Response generateReport(JSONObject requestJson) {
+        RequestBody body = RequestBody.create(String.valueOf(requestJson), JSON);
+        return callAPI(BASE_URL + "/report/expiry_report", body);
+    }
+
+    public static boolean downloadFile(Response response, File destFile) {
+        try {
+            ResponseBody body = response.body();
+            long contentLength = body.contentLength();
+            BufferedSource source = body.source();
+
+            BufferedSink sink = Okio.buffer(Okio.sink(destFile));
+            Buffer sinkBuffer = sink.buffer();
+
+            long totalBytesRead = 0;
+            int bufferSize = 8 * 1024;
+            for (long bytesRead; (bytesRead = source.read(sinkBuffer, bufferSize)) != -1; ) {
+                sink.emit();
+                totalBytesRead += bytesRead;
+                int progress = (int) ((totalBytesRead * 100) / contentLength);
+                // publishProgress(progress);
+            }
+            sink.flush();
+            sink.close();
+            source.close();
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while downloading file", e);
+            return false;
+        }
     }
 
     private static Response callAPI(String url, RequestBody body) {

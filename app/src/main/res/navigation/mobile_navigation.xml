@@ -28,4 +28,10 @@
         android:name="com.og.medicare.ui.order.OrderFragment"
         android:label="@string/menu_add_order"
         tools:layout="@layout/fragment_order" />
+
+    <fragment
+        android:id="@+id/nav_report"
+        android:name="com.og.medicare.ui.report.ReportFragment"
+        android:label="@string/menu_report"
+        tools:layout="@layout/fragment_report" />
 </navigation>

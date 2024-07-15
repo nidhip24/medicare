@@ -24,4 +24,8 @@
     <string name="menu_add_inventory">Add Inventory</string>
     <string name="menu_add_distribution">Add Distribution</string>
     <string name="menu_add_order">Add Order</string>
+    <string name="menu_report">Reports</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

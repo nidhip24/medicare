@@ -21,5 +21,10 @@
             android:id="@+id/nav_order"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_add_order" />
+
+        <item
+            android:id="@+id/nav_report"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_report" />
     </group>
 </menu>
