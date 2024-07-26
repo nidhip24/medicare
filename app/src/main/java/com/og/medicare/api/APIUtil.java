@@ -113,6 +113,23 @@ public class APIUtil {
         return callGetAPI(BASE_URL + "/distribution");
     }
 
+    public static Response getRoles() {
+        return callGetAPI(BASE_URL + "/roles");
+    }
+
+    public static Response getRegisteredUser() {
+        return callGetAPI(BASE_URL + "/register");
+    }
+
+    public static Response getOrders() {
+        return callGetAPI(BASE_URL + "/order");
+    }
+
+    public static Response addUser(JSONObject obj) {
+        RequestBody body = RequestBody.create(String.valueOf(obj), JSON);
+        return callAPI(BASE_URL + "/register", body);
+    }
+
     private static Response callGetAPI(String url) {
         try {
             Request request = new Request.Builder()
@@ -126,7 +143,7 @@ public class APIUtil {
             }
             return response;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Exception while calling get API", e);
             return null;
         }
     }

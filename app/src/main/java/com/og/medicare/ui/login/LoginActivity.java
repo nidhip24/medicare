@@ -3,6 +3,7 @@ package com.og.medicare.ui.login;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -36,7 +37,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.og.medicare.R;
+import com.og.medicare.api.APIUtil;
 import com.og.medicare.databinding.ActivityLoginBinding;
+import com.og.medicare.util.DataStorage;
+
+import org.json.JSONArray;
+
+import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -51,6 +58,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        StrictMode.ThreadPolicy gfgPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(gfgPolicy);
 
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -98,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.GONE);
                 if (loginResult.getError() != null) {
                     showLoginFailed(loginResult.getError());
+                    return;
                 }
                 if (loginResult.getSuccess() != null) {
                     updateUiWithUser(loginResult.getSuccess());
@@ -166,12 +177,43 @@ public class LoginActivity extends AppCompatActivity {
         //mAuth.signOut();
     }
 
+    private void initUser() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            String username = user.getEmail();
+            Response userResponse = APIUtil.getRegisteredUser();
+
+            try {
+                JSONArray jsonArray = new JSONArray(userResponse.body().string());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    if (jsonArray.getJSONObject(i).getString("email").equals(username)) {
+                        // User is registered
+                        DataStorage.getInstance(getApplicationContext())
+                                .setString("user", jsonArray.getJSONObject(i).toString());
+                        DataStorage.getInstance(getApplicationContext()).setString("email", username);
+                        DataStorage.getInstance(getApplicationContext())
+                                .setString("id", jsonArray.getJSONObject(i).optInt("id") + "");
+
+                        int rid = jsonArray.getJSONObject(i).optInt("rid");
+                        DataStorage.getInstance(getApplicationContext())
+                                .setString("type", rid == 1 ? "Admin" : "User");
+                        Log.e("User", "SETTING");
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
+            initUser();
             Toast.makeText(getApplicationContext(), "Already logged in", Toast.LENGTH_SHORT).show();
             Toast.makeText(LoginActivity.this, "Authentication success",
                     Toast.LENGTH_SHORT).show();
@@ -193,6 +235,7 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            initUser();
                             Toast.makeText(LoginActivity.this, "Authentication success",
                                     Toast.LENGTH_SHORT).show();
 

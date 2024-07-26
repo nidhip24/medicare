@@ -2,27 +2,38 @@ package com.og.medicare.ui.order;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.og.medicare.R;
+import com.og.medicare.adapter.CommonListAdapter;
 import com.og.medicare.api.APIUtil;
 import com.og.medicare.databinding.FragmentInventoryBinding;
 import com.og.medicare.databinding.FragmentOrderBinding;
+import com.og.medicare.model.CommonList;
 import com.og.medicare.model.Inventory;
+import com.og.medicare.model.Order;
+import com.og.medicare.model.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,127 +46,37 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 import okhttp3.Response;
 
 public class OrderFragment extends Fragment {
 
     private FragmentOrderBinding binding;
-    ArrayList<Inventory> dataModels;
 
-    private EditText etTextOrderDate, editTextQuantity, editTextRequestedBy,
-            editTextHealthStation;
+    ListView listView;
+    private static CommonListAdapter adapter;
 
-    private MaterialAutoCompleteTextView editTextMedicineName;
+    private ArrayList<CommonList> dataModels;
+    private ArrayList<CommonList> filteredDataModels;
+
+    private HashMap<Integer, Inventory> inventoryData;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentOrderBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        listView = binding.itemList;
+        EditText search = binding.search;
 
-        etTextOrderDate = binding.editTextOrderDate;
-        editTextMedicineName = binding.dpMedicineName;
-        editTextQuantity = binding.editTextQuantity;
-        editTextRequestedBy = binding.editTextRequestedBy;
-        editTextHealthStation = binding.editTextHealthStation;
-
-        etTextOrderDate.setOnClickListener(v -> showDatePickerDialog(etTextOrderDate));
-
-        Response inventoryResponse = APIUtil.getInventory();
         dataModels = new ArrayList<>();
-        parseResponse(inventoryResponse);
+        filteredDataModels = new ArrayList<>();
 
-        String[] medicineNames = new String[dataModels.size()];
-        for (int i = 0; i < dataModels.size(); i++) {
-            medicineNames[i] = dataModels.get(i).getMedicineName() + " - " + dataModels.get(i).getBrandName();
-        }
-        editTextMedicineName.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, medicineNames));
-
-        binding.btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String orderDate = etTextOrderDate.getText().toString().trim();
-                String quantity = editTextQuantity.getText().toString().trim();
-                String requestedBy = editTextRequestedBy.getText().toString().trim();
-                String healthStation = editTextHealthStation.getText().toString().trim();
-
-                String medicineName = editTextMedicineName.getText().toString().trim();
-
-                // Validate the input
-                if (orderDate.isEmpty()) {
-                    etTextOrderDate.setError("Order date is required");
-                    etTextOrderDate.requestFocus();
-                    return;
-                }
-                if (quantity.isEmpty()) {
-                    editTextQuantity.setError("Quantity is required");
-                    editTextQuantity.requestFocus();
-                    return;
-                }
-                if (requestedBy.isEmpty()) {
-                    editTextRequestedBy.setError("Requested by is required");
-                    editTextRequestedBy.requestFocus();
-                    return;
-                }
-                if (healthStation.isEmpty()) {
-                    editTextHealthStation.setError("Health station is required");
-                    editTextHealthStation.requestFocus();
-                    return;
-                }
-                if (medicineName.isEmpty()) {
-                    editTextMedicineName.setError("Medicine name is required");
-                    editTextMedicineName.requestFocus();
-                    return;
-                }
-
-
-                // Create json object and send to the server
-                JSONObject order = new JSONObject();
-                try {
-                    order.put("date_requested", orderDate);
-                    order.put("mtid", findItem(medicineName));
-                    order.put("quantity_requested", quantity);
-                    order.put("requested_by", requestedBy);
-                    order.put("health_station_name", healthStation);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                Response response = APIUtil.addOrder(order);
-                if (response != null) {
-                    if (response.isSuccessful() && response.code() == 200) {
-                        Toast.makeText(getContext(), "Order added successfully", Toast.LENGTH_SHORT).show();
-
-                        // reset the form
-                        etTextOrderDate.setText("");
-                        editTextQuantity.setText("");
-                        editTextRequestedBy.setText("");
-                        editTextHealthStation.setText("");
-                        editTextMedicineName.setText("");
-                    } else {
-                        Toast.makeText(getContext(), "Failed to add order", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Failed to add order", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        return root;
-    }
-
-    private int findItem(String medicineName) {
-        for (int i = 0; i < dataModels.size(); i++) {
-            String[] mName = medicineName.split(" - ");
-            if (dataModels.get(i).getMedicineName().equalsIgnoreCase(mName[0].trim())
-                    && dataModels.get(i).getBrandName().equalsIgnoreCase(mName[1].trim())) {
-                return dataModels.get(i).getId();
-            }
-        }
-        return -1;
-    }
-
-    private void parseResponse(Response inventoryResponse) {
+        // getting inventory
+        Response inventoryResponse = APIUtil.getInventory();
+        inventoryData = new HashMap<>();
         try {
             JSONArray inventory = new JSONArray(inventoryResponse.body().string());
             for (int i = 0; i < inventory.length(); i++) {
@@ -168,7 +89,7 @@ public class OrderFragment extends Fragment {
                     epxiryDate = Date.from(localDateTime.atZone(zonedDateTime.getZone()).toInstant());
                 }
 
-                dataModels.add(new Inventory(
+                inventoryData.put(inventory.getJSONObject(i).getInt("id"), new Inventory(
                         inventory.getJSONObject(i).getInt("id"),
                         1,
                         inventory.getJSONObject(i).getInt("quantity"),
@@ -184,24 +105,119 @@ public class OrderFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
 
-    private void showDatePickerDialog(EditText editText) {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        adapter = new CommonListAdapter(filteredDataModels,getContext());
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
-                String date = selectedYear + "-" + (selectedMonth + 1) + "-" + selectedDay;
-                editText.setText(date);
+        Response response = APIUtil.getOrders();
+
+        try {
+            JSONArray jsonArray = new JSONArray(response.body().string());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                ZonedDateTime zonedDateTime = null;
+                Date created_at = getDate(jsonArray.getJSONObject(i).getString("created_at"));
+                Date date_requested = getDate(jsonArray.getJSONObject(i).getString("date_requested"));
+
+                Order order = Order.builder()
+                        .id(jsonArray.getJSONObject(i).getInt("id"))
+                        .mtid(jsonArray.getJSONObject(i).getInt("mtid"))
+                        .quantity_requested(jsonArray.getJSONObject(i).getInt("quantity_requested"))
+                        .requested_by(jsonArray.getJSONObject(i).getString("requested_by"))
+                        .health_station_name(jsonArray.getJSONObject(i).getString("health_station_name"))
+                        .date_requested(date_requested)
+                        .created_at(created_at).build();
+
+                Inventory inventory = inventoryData.get(order.getMtid());
+                dataModels.add(CommonList.builder()
+                        .id(jsonArray.getJSONObject(i).getInt("id"))
+                        .title(inventory != null ? inventory.getMedicineName() : "Unknown")
+                        .subTitle(jsonArray.getJSONObject(i).getString("requested_by"))
+                        .obj(order).build());
             }
-        }, year, month, day);
-        datePickerDialog.show();
+            filteredDataModels.addAll(dataModels); // Initially, filtered list contains all items
+            adapter.notifyDataSetChanged();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                CommonList dataModel= dataModels.get(position);
+//
+                Inventory inventory = inventoryData.get(((Order) dataModel.getObj()).getMtid());
+
+                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create(); //Read Update
+                alertDialog.setTitle("Order information");
+                alertDialog.setMessage(
+                        "ID: " + ((Order) dataModel.getObj()).getId() + "\n" +
+                        "Medicine: " + inventory.getMedicineName() + "\n" +
+                        "Quantity Requested: " + ((Order) dataModel.getObj()).getQuantity_requested() + "\n" +
+                        "Requested By: " + ((Order) dataModel.getObj()).getRequested_by() + "\n" +
+                        "Health Station Name: " + ((Order) dataModel.getObj()).getHealth_station_name() + "\n" +
+                        "Date Requested: " + ((Order) dataModel.getObj()).getDate_requested() + "\n" +
+                        "Created At: " + ((Order) dataModel.getObj()).getCreated_at()
+                );
+
+                alertDialog.setButton("Continue..", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // here you can add functions
+                    }
+                });
+
+                alertDialog.show();
+            }
+        });
+
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Do nothing
+            }
+        });
+
+        return root;
     }
 
+    private void filter(String text) {
+        filteredDataModels.clear();
+        if (text.isEmpty()) {
+            filteredDataModels.addAll(dataModels);
+        } else {
+            text = text.toLowerCase();
+            for (CommonList item : dataModels) {
+                if (item.getTitle().toLowerCase().contains(text) ||
+                        item.getSubTitle().toLowerCase().contains(text)) {
+                    filteredDataModels.add(item);
+                }
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    private Date getDate(String date) {
+        ZonedDateTime zonedDateTime = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            zonedDateTime = ZonedDateTime.parse(date,
+                    DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime localDateTime = zonedDateTime.toLocalDateTime();
+            return Date.from(localDateTime.atZone(zonedDateTime.getZone()).toInstant());
+        }
+        return null;
+    }
 
     @Override
     public void onDestroyView() {

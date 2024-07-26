@@ -18,6 +18,11 @@
             android:title="@string/menu_add_distribution" />
 
         <item
+            android:id="@+id/nav_distribution_list"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_distribution" />
+
+        <item
             android:id="@+id/nav_order"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_add_order" />
@@ -26,5 +31,10 @@
             android:id="@+id/nav_report"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_report" />
+
+        <item
+            android:id="@+id/nav_register"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_register" />
     </group>
 </menu>
