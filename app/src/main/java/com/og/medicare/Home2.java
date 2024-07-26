@@ -62,18 +62,11 @@ public class Home2 extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (navController.getCurrentDestination().getId() == R.id.nav_home) {
-                    Snackbar.make(view, "Replace with your own action home", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null)
-                            .setAnchorView(R.id.fab).show();
+
                 } else if (navController.getCurrentDestination().getId() == R.id.nav_inventory) {
-                    Snackbar.make(view, "Replace with your own action inventory", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null)
-                            .setAnchorView(R.id.fab).show();
 
                 } else if (navController.getCurrentDestination().getId() == R.id.nav_distribution) {
-                    Snackbar.make(view, "Replace with your own action distribution", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null)
-                            .setAnchorView(R.id.fab).show();
+
                 } else if (navController.getCurrentDestination().getId() == R.id.nav_order) {
                     OrderBS orderBS = OrderBS.newInstance();
                     orderBS.show(getSupportFragmentManager(), "orderBS");

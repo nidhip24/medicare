@@ -115,7 +115,7 @@ public class DistributionListFragment extends Fragment {
                 CommonList dataModel= dataModels.get(position);
 
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create(); //Read Update
-                alertDialog.setTitle("Order information");
+                alertDialog.setTitle("Distribution information");
                 alertDialog.setMessage(
                         "Generic Name: " + ((Distribution) dataModel.getObj()).getGeneric_name() + "\n" +
                                 "Brand Name: " + ((Distribution) dataModel.getObj()).getBrand_name() + "\n" +
