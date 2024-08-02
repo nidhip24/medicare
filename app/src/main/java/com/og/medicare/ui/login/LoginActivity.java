@@ -40,6 +40,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.og.medicare.R;
 import com.og.medicare.api.APIUtil;
+import com.og.medicare.cache.AppCache;
 import com.og.medicare.databinding.ActivityLoginBinding;
 import com.og.medicare.util.DataStorage;
 
@@ -206,6 +207,22 @@ public class LoginActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        // Initialize cache
+        initCache();
+    }
+
+    private void initCache() {
+        Response configResponse = APIUtil.getConfig();
+        try {
+            JSONArray jsonArray = new JSONArray(configResponse.body().string());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                AppCache.getInstance().setCache(jsonArray.getJSONObject(i).getString("name"),
+                        jsonArray.getJSONObject(i).getString("value").split(","));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error while parsing config", e);
         }
     }
 

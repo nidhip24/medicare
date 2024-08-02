@@ -109,20 +109,36 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Unit of Measure -->
-            <com.google.android.material.textfield.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginTop="16dp"
-                android:hint="Unit of Measure"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                android:hint="Unit of Measure">
 
-                <EditText
-                    android:id="@+id/et_unit_measure"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:theme="@style/ThemeEditTextLight" />
+                    android:id="@+id/et_unit_measure"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Classification of Medicine -->
+            <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="16dp"
+                android:hint="Classification of Medicine">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/et_classification_of_medicine"
+                    />
 
             </com.google.android.material.textfield.TextInputLayout>
 

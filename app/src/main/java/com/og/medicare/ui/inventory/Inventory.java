@@ -13,11 +13,14 @@ import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.og.medicare.R;
 import com.og.medicare.api.APIUtil;
+import com.og.medicare.cache.AppCache;
 import com.og.medicare.databinding.FragmentHomeBinding;
 import com.og.medicare.databinding.FragmentInventoryBinding;
 
@@ -30,6 +33,7 @@ import okhttp3.Response;
 public class Inventory extends Fragment {
 
     private FragmentInventoryBinding binding;
+    private MaterialAutoCompleteTextView etUnitMeasure, etClassificationOfMedicine;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -48,6 +52,16 @@ public class Inventory extends Fragment {
             }
         });
 
+        etUnitMeasure = binding.etUnitMeasure;
+        etClassificationOfMedicine = binding.etClassificationOfMedicine;
+
+        // Set the dropdown values for the unit of measure
+        etUnitMeasure.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, AppCache.getInstance().getCache("unit_of_measure")));
+
+        etClassificationOfMedicine.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, AppCache.getInstance().getCache("classification_of_medicine")));
+
         // Set click listener for the submit button
         binding.btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +72,8 @@ public class Inventory extends Fragment {
                 String expiryDate = binding.etExpiryDate.getText().toString().trim();
                 String quantity = binding.etQuantity.getText().toString().trim();
                 String lotNumber = binding.etLotNumber.getText().toString().trim();
-                String unitMeasure = binding.etUnitMeasure.getText().toString().trim();
+                String unitMeasure = etUnitMeasure.getText().toString().trim();
+                String classificationOfMedicine = etClassificationOfMedicine.getText().toString().trim();
 
                 // Validate inputs
                 if (genericName.isEmpty()) {
@@ -96,6 +111,13 @@ public class Inventory extends Fragment {
                     binding.etUnitMeasure.requestFocus();
                     return;
                 }
+
+                if (classificationOfMedicine.isEmpty()) {
+                    binding.etClassificationOfMedicine.setError("Classification of Medicine is required");
+                    binding.etClassificationOfMedicine.requestFocus();
+                    return;
+                }
+
                 JSONObject inventoryJson = new JSONObject();
                 try {
                     inventoryJson.put("generic_name", genericName);
@@ -104,6 +126,7 @@ public class Inventory extends Fragment {
                     inventoryJson.put("quantity", quantity);
                     inventoryJson.put("lot_number", lotNumber);
                     inventoryJson.put("unit_of_measure", unitMeasure);
+                    inventoryJson.put("classification_of_medicine", classificationOfMedicine);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -119,7 +142,8 @@ public class Inventory extends Fragment {
                         binding.etExpiryDate.setText("");
                         binding.etQuantity.setText("");
                         binding.etLotNumber.setText("");
-                        binding.etUnitMeasure.setText("");
+                        etUnitMeasure.setText("");
+                        etClassificationOfMedicine.setText("");
                     } else {
                         Toast.makeText(getContext(), "Failed to add record", Toast.LENGTH_SHORT).show();
                     }

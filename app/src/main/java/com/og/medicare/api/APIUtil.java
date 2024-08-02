@@ -105,6 +105,24 @@ public class APIUtil {
         }
     }
 
+    private static Response callPutAPI(String url, RequestBody body) {
+        try {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .put(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Response getInventory() {
         return callGetAPI(BASE_URL + "/inventory");
     }
@@ -121,8 +139,16 @@ public class APIUtil {
         return callGetAPI(BASE_URL + "/register");
     }
 
+    public static Response getOrders(int uid) {
+        return callGetAPI(BASE_URL + "/order?uid=" + uid);
+    }
+
     public static Response getOrders() {
         return callGetAPI(BASE_URL + "/order");
+    }
+
+    public static Response getConfig() {
+        return callGetAPI(BASE_URL + "/config");
     }
 
     public static Response addUser(JSONObject obj) {
@@ -146,5 +172,10 @@ public class APIUtil {
             Log.e(TAG, "Exception while calling get API", e);
             return null;
         }
+    }
+
+    public static Response updateOrder(int id, JSONObject inventoryJson) {
+        RequestBody body = RequestBody.create(String.valueOf(inventoryJson), JSON);
+        return callPutAPI(BASE_URL + "/order/" + id, body);
     }
 }

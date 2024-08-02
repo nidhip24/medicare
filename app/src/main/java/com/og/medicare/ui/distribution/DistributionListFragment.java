@@ -178,10 +178,12 @@ public class DistributionListFragment extends Fragment {
     private Date getDate(String date) {
         ZonedDateTime zonedDateTime = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            zonedDateTime = ZonedDateTime.parse(date,
-                    DateTimeFormatter.ISO_DATE_TIME);
-            LocalDateTime localDateTime = zonedDateTime.toLocalDateTime();
-            return Date.from(localDateTime.atZone(zonedDateTime.getZone()).toInstant());
+            if (date != null && !date.isEmpty() && !date.equalsIgnoreCase("null")) {
+                zonedDateTime = ZonedDateTime.parse(date,
+                        DateTimeFormatter.ISO_DATE_TIME);
+                LocalDateTime localDateTime = zonedDateTime.toLocalDateTime();
+                return Date.from(localDateTime.atZone(zonedDateTime.getZone()).toInstant());
+            }
         }
         return null;
     }

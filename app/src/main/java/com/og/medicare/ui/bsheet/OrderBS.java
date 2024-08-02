@@ -28,8 +28,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.og.medicare.R;
 import com.og.medicare.api.APIUtil;
+import com.og.medicare.cache.AppCache;
 import com.og.medicare.model.Inventory;
 import com.og.medicare.model.Role;
+import com.og.medicare.util.DataStorage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,9 +49,8 @@ import okhttp3.Response;
 
 public class OrderBS extends BottomSheetDialogFragment {
 
-    private EditText etTextOrderDate, editTextQuantity, editTextRequestedBy,
-            editTextHealthStation;
-    private MaterialAutoCompleteTextView editTextMedicineName;
+    private EditText etTextOrderDate, editTextQuantity, editTextRequestedBy;
+    private MaterialAutoCompleteTextView editTextMedicineName, editTextHealthStation;
 
     private Button button;
     private MaterialAutoCompleteTextView autoComplete;
@@ -74,6 +75,9 @@ public class OrderBS extends BottomSheetDialogFragment {
         editTextRequestedBy = view.findViewById(R.id.editTextRequestedBy);
         editTextHealthStation = view.findViewById(R.id.editTextHealthStation);
         button = view.findViewById(R.id.btn_submit);
+
+        editTextHealthStation.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, AppCache.getInstance().getCache("health_station_name")));
 
         etTextOrderDate.setOnClickListener(v -> showDatePickerDialog(etTextOrderDate));
 
@@ -133,6 +137,8 @@ public class OrderBS extends BottomSheetDialogFragment {
                     order.put("quantity_requested", quantity);
                     order.put("requested_by", requestedBy);
                     order.put("health_station_name", healthStation);
+                    order.put("uid",
+                            Integer.parseInt(DataStorage.getInstance(getContext()).getS("id")));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

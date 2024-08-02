@@ -81,19 +81,18 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Health Station Name -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/t_health_station_name"
+
+    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Health Station Name"
         android:layout_marginTop="16dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        android:hint="Health Station Name">
 
-        <EditText
-            android:id="@+id/editTextHealthStation"
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"/>
+            android:id="@+id/editTextHealthStation"
+            />
 
     </com.google.android.material.textfield.TextInputLayout>
 

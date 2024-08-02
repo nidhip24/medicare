@@ -27,13 +27,16 @@ import android.widget.Toast;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.og.medicare.R;
 import com.og.medicare.adapter.CommonListAdapter;
+import com.og.medicare.adapter.OrderListAdapter;
 import com.og.medicare.api.APIUtil;
 import com.og.medicare.databinding.FragmentInventoryBinding;
 import com.og.medicare.databinding.FragmentOrderBinding;
 import com.og.medicare.model.CommonList;
 import com.og.medicare.model.Inventory;
 import com.og.medicare.model.Order;
+import com.og.medicare.model.OrderList;
 import com.og.medicare.model.User;
+import com.og.medicare.util.DataStorage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,10 +58,10 @@ public class OrderFragment extends Fragment {
     private FragmentOrderBinding binding;
 
     ListView listView;
-    private static CommonListAdapter adapter;
+    private static OrderListAdapter adapter;
 
-    private ArrayList<CommonList> dataModels;
-    private ArrayList<CommonList> filteredDataModels;
+    private ArrayList<OrderList> dataModels;
+    private ArrayList<OrderList> filteredDataModels;
 
     private HashMap<Integer, Inventory> inventoryData;
 
@@ -106,9 +109,16 @@ public class OrderFragment extends Fragment {
             e.printStackTrace();
         }
 
-        adapter = new CommonListAdapter(filteredDataModels,getContext());
+        adapter = new OrderListAdapter(filteredDataModels,getContext());
 
-        Response response = APIUtil.getOrders();
+        // getting orders
+        Response response = null;
+        boolean isAdmin = DataStorage.getInstance(getContext()).getS("type").equalsIgnoreCase("admin");
+        if (isAdmin) {
+            response = APIUtil.getOrders();
+        } else {
+            response = APIUtil.getOrders(Integer.parseInt(DataStorage.getInstance(getContext()).getS("id")));
+        }
 
         try {
             JSONArray jsonArray = new JSONArray(response.body().string());
@@ -123,14 +133,18 @@ public class OrderFragment extends Fragment {
                         .quantity_requested(jsonArray.getJSONObject(i).getInt("quantity_requested"))
                         .requested_by(jsonArray.getJSONObject(i).getString("requested_by"))
                         .health_station_name(jsonArray.getJSONObject(i).getString("health_station_name"))
+                        .added_by(jsonArray.getJSONObject(i).getString("added_by"))
                         .date_requested(date_requested)
                         .created_at(created_at).build();
 
                 Inventory inventory = inventoryData.get(order.getMtid());
-                dataModels.add(CommonList.builder()
+                dataModels.add(OrderList.builder()
                         .id(jsonArray.getJSONObject(i).getInt("id"))
                         .title(inventory != null ? inventory.getMedicineName() : "Unknown")
                         .subTitle(jsonArray.getJSONObject(i).getString("requested_by"))
+                        .addedBy(jsonArray.getJSONObject(i).getString("added_by"))
+                        .status(jsonArray.getJSONObject(i).getString("status"))
+                        .isAdmin(isAdmin)
                         .obj(order).build());
             }
             filteredDataModels.addAll(dataModels); // Initially, filtered list contains all items
@@ -146,7 +160,7 @@ public class OrderFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                CommonList dataModel= dataModels.get(position);
+                OrderList dataModel= dataModels.get(position);
 //
                 Inventory inventory = inventoryData.get(((Order) dataModel.getObj()).getMtid());
 
@@ -155,6 +169,8 @@ public class OrderFragment extends Fragment {
                 alertDialog.setMessage(
                         "ID: " + ((Order) dataModel.getObj()).getId() + "\n" +
                         "Medicine: " + inventory.getMedicineName() + "\n" +
+                        "Added by : " + ((Order) dataModel.getObj()).getAdded_by() + "\n" +
+                        "Status: " + dataModel.getStatus() + "\n" +
                         "Quantity Requested: " + ((Order) dataModel.getObj()).getQuantity_requested() + "\n" +
                         "Requested By: " + ((Order) dataModel.getObj()).getRequested_by() + "\n" +
                         "Health Station Name: " + ((Order) dataModel.getObj()).getHealth_station_name() + "\n" +
@@ -198,7 +214,7 @@ public class OrderFragment extends Fragment {
             filteredDataModels.addAll(dataModels);
         } else {
             text = text.toLowerCase();
-            for (CommonList item : dataModels) {
+            for (OrderList item : dataModels) {
                 if (item.getTitle().toLowerCase().contains(text) ||
                         item.getSubTitle().toLowerCase().contains(text)) {
                     filteredDataModels.add(item);

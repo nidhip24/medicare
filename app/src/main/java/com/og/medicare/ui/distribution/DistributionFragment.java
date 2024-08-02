@@ -13,13 +13,16 @@ import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.og.medicare.R;
 import com.og.medicare.api.APIUtil;
+import com.og.medicare.cache.AppCache;
 import com.og.medicare.databinding.FragmentDistributionBinding;
 import com.og.medicare.databinding.FragmentHomeBinding;
 import com.og.medicare.databinding.FragmentSlideshowBinding;
@@ -35,8 +38,9 @@ public class DistributionFragment extends Fragment {
 
     private FragmentDistributionBinding binding;
 
-    private EditText etDateDispensed, etGenericName, etBrandName, etUnitMeasure, etQuantityDispensed, etLotNumber, etExpirationDate, etPatientName, etPatientBirthDate, etPatientAddress, etPatientDiagnosis;
+    private EditText etDateDispensed, etGenericName, etBrandName, etQuantityDispensed, etLotNumber, etExpirationDate, etPatientName, etPatientBirthDate, etPatientAddress, etPatientDiagnosis;
     private Button btnSubmit;
+    private MaterialAutoCompleteTextView etEndUser, etUnitMeasure;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -60,11 +64,18 @@ public class DistributionFragment extends Fragment {
         etPatientBirthDate = root.findViewById(R.id.et_patient_birth_date);
         etPatientAddress = root.findViewById(R.id.et_patient_address);
         etPatientDiagnosis = root.findViewById(R.id.et_patient_diagnosis);
+        etEndUser = root.findViewById(R.id.et_end_user);
         btnSubmit = root.findViewById(R.id.btn_submit);
 
         etDateDispensed.setOnClickListener(v -> showDatePickerDialog(etDateDispensed));
         etExpirationDate.setOnClickListener(v -> showDatePickerDialog(etExpirationDate));
         etPatientBirthDate.setOnClickListener(v -> showDatePickerDialog(etPatientBirthDate));
+
+        etEndUser.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, AppCache.getInstance().getCache("end_users")));
+
+        etUnitMeasure.setAdapter(new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, AppCache.getInstance().getCache("unit_of_measure")));
 
         btnSubmit.setOnClickListener(v -> {
             // Get values from EditTexts
@@ -79,6 +90,7 @@ public class DistributionFragment extends Fragment {
             String patientBirthDate = etPatientBirthDate.getText().toString().trim();
             String patientAddress = etPatientAddress.getText().toString().trim();
             String patientDiagnosis = etPatientDiagnosis.getText().toString().trim();
+            String endUser = etEndUser.getText().toString().trim();
 
             // Validate inputs
             if (dateDispensed.isEmpty()) {
@@ -116,21 +128,33 @@ public class DistributionFragment extends Fragment {
                 etExpirationDate.requestFocus();
                 return;
             }
-            if (patientName.isEmpty()) {
-                etPatientName.setError("Patient Name is required");
-                etPatientName.requestFocus();
+            if (endUser.isEmpty()) {
+                etEndUser.setError("End User is required");
+                etEndUser.requestFocus();
                 return;
             }
-            if (patientBirthDate.isEmpty()) {
-                etPatientBirthDate.setError("Patient Birth Date is required");
-                etPatientBirthDate.requestFocus();
-                return;
-            }
-            if (patientAddress.isEmpty()) {
-                etPatientAddress.setError("Patient Address is required");
-                etPatientAddress.requestFocus();
-                return;
-            }
+
+            // optional fields
+//            if (patientName.isEmpty()) {
+//                etPatientName.setError("Patient Name is required");
+//                etPatientName.requestFocus();
+//                return;
+//            }
+//            if (patientBirthDate.isEmpty()) {
+//                etPatientBirthDate.setError("Patient Birth Date is required");
+//                etPatientBirthDate.requestFocus();
+//                return;
+//            }
+//            if (patientAddress.isEmpty()) {
+//                etPatientAddress.setError("Patient Address is required");
+//                etPatientAddress.requestFocus();
+//                return;
+//            }
+//            if (patientDiagnosis.isEmpty()) {
+//                etPatientDiagnosis.setError("Patient Diagnosis is required");
+//                etPatientDiagnosis.requestFocus();
+//                return;
+//            }
 
             // Create a JSON object
             JSONObject distributionJson = new JSONObject();
@@ -146,6 +170,7 @@ public class DistributionFragment extends Fragment {
                 distributionJson.put("patient_birth_date", patientBirthDate);
                 distributionJson.put("patient_address", patientAddress);
                 distributionJson.put("patient_diagnosis", patientDiagnosis);
+                distributionJson.put("end_user", endUser);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -167,6 +192,7 @@ public class DistributionFragment extends Fragment {
                     etPatientBirthDate.setText("");
                     etPatientAddress.setText("");
                     etPatientDiagnosis.setText("");
+                    etEndUser.setText("");
                 } else {
                     Toast.makeText(getContext(), "Failed to add record", Toast.LENGTH_SHORT).show();
                 }
